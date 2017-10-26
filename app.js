@@ -1,7 +1,7 @@
 'use strict';
 
 const execute = () => {
-    const target = 20;
+    const target = 300;
     const populationCount = 100;
     const individualLength = 4;
     const max = 9;
