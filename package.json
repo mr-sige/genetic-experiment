@@ -1,0 +1,22 @@
+{
+  "name": "genetic",
+  "version": "1.0.0",
+  "description": "Genetic experiment",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mr-sige/genetic-experiment.git"
+  },
+  "keywords": [
+    "genetic"
+  ],
+  "author": "sige",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mr-sige/genetic-experiment/issues"
+  },
+  "homepage": "https://github.com/mr-sige/genetic-experiment#readme"
+}
