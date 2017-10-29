@@ -18,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/mr-sige/genetic-experiment/issues"
   },
-  "homepage": "https://github.com/mr-sige/genetic-experiment#readme"
+  "homepage": "https://github.com/mr-sige/genetic-experiment#readme",
+  "devDependencies": {
+    "eslint": "^4.9.0",
+    "jest": "^21.2.1"
+  }
 }
