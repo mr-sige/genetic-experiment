@@ -4,8 +4,8 @@
 const app = require('./app');
 
 test('test getRandom', () => {
-    for (let i=0; i < 100; i++){
-        const random = app.getRandom(0,20);
+    for (let i = 0; i < 100; i++) {
+        const random = app.getRandom(0, 20);
         expect(random).toBeGreaterThanOrEqual(0);
         expect(random).toBeLessThanOrEqual(20);
     }
@@ -80,7 +80,7 @@ test('test fitnessOfPopulation', () => {
     expect(fitness).toEqual(47);
 });
 
-test('test mutate', () => {
+test('test mutatePopulation', () => {
     const parents = [
         [30, 30, 10, 30, 90, 10],
         [30, 30, 10, 10, 10, 10],
@@ -93,16 +93,59 @@ test('test mutate', () => {
         [10, 10, 10, 10, 10, 10],
         [30, 30, 10, 30, 90, 10]
     ];
+    const fitnessParents = app.fitnessOfPopulation(parents, 100);
     const mutants = app.mutatePopulation(parents, 1);
     expect(mutants.length).toEqual(10);
     expect(mutants[0].length).toEqual(6);
     expect(mutants[9].length).toEqual(6);
-    const fitnessParents = app.fitnessOfPopulation(parents, 100);
+    const fitnessParentsAfterMutation = app.fitnessOfPopulation(parents, 100);
+    expect(fitnessParentsAfterMutation).toEqual(fitnessParents);
     const fitnessMutants = app.fitnessOfPopulation(mutants, 100);
     expect(fitnessParents).not.toEqual(fitnessMutants);
 });
 
+test('test thisIsSparta', () => {
+    const population = [
+        [10, 10, 10, 10, 10, 10], //40
+        [30, 30, 10, 30, 90, 10], //100
+        [30, 30, 10, 10, 10, 10]  //0
+    ];
+    const sparta = app.thisIsSparta(population, 100, 0.2);
+    expect(sparta.parents.length).toEqual(1);
+    expect(sparta.parents[0]).toEqual(population[2]);
+    expect(sparta.rejects.length).toEqual(2);
+});
 
+test('test selectSurvivors', () => {
+    const rejects = [
+        [10, 10, 10, 10, 10, 10],
+        [30, 30, 10, 30, 90, 10],
+        [30, 30, 10, 30, 50, 10],
+        [10, 10, 10, 10, 10, 10],
+        [30, 30, 10, 30, 90, 10],
+        [30, 30, 10, 30, 50, 10]
+    ];
+    const survivors = app.selectSurvivors(rejects, 0.3);
+    expect(survivors.length).toEqual(2);
+});
+
+test('test breed', () => {
+    const parents = [
+        [30, 30, 10, 30, 90, 10],
+        [30, 30, 10, 10, 10, 10],
+        [10, 10, 10, 10, 10, 10],
+        [30, 30, 10, 30, 90, 10],
+        [30, 30, 10, 10, 10, 10],
+        [10, 10, 10, 10, 10, 10],
+        [30, 30, 10, 30, 90, 10],
+        [30, 30, 10, 10, 10, 10],
+        [10, 10, 10, 10, 10, 10],
+        [30, 30, 10, 30, 90, 10]
+    ];
+    const populationCount = 50;
+    const newGeneration = app.breed(parents, populationCount);
+    expect(newGeneration.length).toEqual(populationCount);
+});
 
 
 

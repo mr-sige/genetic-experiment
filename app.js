@@ -8,14 +8,7 @@ const execute = () => {
     const min = 0;
 
     let population = createPopulation(populationCount, min, max, individualLength);
-    let populationFitness = fitnessOfPopulation(population, target);
-    const fittnessHistory = [populationFitness];
 
-    for (let i = 0; i < 100; i++) {
-        population = evolve(population, target);
-        populationFitness = fitnessOfPopulation(population, target);
-        fittnessHistory.push(populationFitness);
-    }
 };
 
 const getRandom = (min, max) => {
@@ -32,11 +25,11 @@ const createIndividual = (min, max, length) => {
     return arr;
 };
 
-const createPopulation = (count, min, max, lenght) => {
+const createPopulation = (count, min, max, length) => {
     //console.log('Creating the population');
     let arr = [];
     for (let i = 0; i < count; i++) {
-        arr.push(createIndividual(min, max, lenght));
+        arr.push(createIndividual(min, max, length));
     }
     return arr;
 };
@@ -56,31 +49,44 @@ const fitnessOfPopulation = (population, target) => {
     return Math.round(sum / population.length);
 };
 
-const selectParents = (population, retain = 0.2) => {
-    population.sort((a, b) => {
-        return fitnessOfIndividual(a) - fitnessOfIndividual(b);
+// split population into future parents and rejects
+const thisIsSparta = (population, target, spartaRatio = 0.2) => {
+    let pop = population.slice(0);
+    pop.sort((a, b) => {
+        const fitA = fitnessOfIndividual(a, target);
+        const fitB = fitnessOfIndividual(b, target);
+        return fitA - fitB;
     });
 
-    const retainCount = Math.round(population.length * retain);
-    let parents = population.slice(0, retainCount);
-    let rejects = population.slice(retainCount);
+    const retainCount = Math.round(pop.length * spartaRatio);
+    let parents = pop.slice(0, retainCount);
+    let rejects = pop.slice(retainCount);
     return {'parents': parents, 'rejects': rejects};
 };
 
-const selectSurvivors = (rejects, randomSelect = 0.1) => {
-    let survivors = [];
-    rejects.forEach((individual) => {
-        if (getRandom(0, 100) < randomSelect * 100) {
-            survivors.push(individual);
-        }
-    });
-    return survivors;
+const selectSurvivors = (rejects, survivingRatio = 0.1) => {
+    let n = Math.round(rejects.length * survivingRatio);
+    const arr = rejects.slice(0);
+
+    let result = new Array(n),
+        len = arr.length,
+        taken = new Array(len);
+    if (n > len)
+        console.log('getRandom: more elements taken than available');
+    while (n--) {
+        var x = Math.floor(Math.random() * len);
+        result[n] = arr[x in taken ? taken[x] : x];
+        taken[x] = --len;
+    }
+    return result;
+
 };
 
 const mutateIndividual = (individual) => {
-    const positionToMutate = getRandom(0, individual.length);
-    individual[positionToMutate] = getRandom(Math.min(...individual), Math.max(...individual));
-    return individual;
+    let mutant = individual.slice(0);
+    const positionToMutate = getRandom(0, mutant.length);
+    mutant[positionToMutate] = getRandom(Math.min(...mutant), Math.max(...mutant));
+    return mutant;
 };
 
 const mutatePopulation = (population, mutation = 0.1) => {
@@ -95,36 +101,33 @@ const mutatePopulation = (population, mutation = 0.1) => {
     return mutants;
 };
 
+const breed = (parents, originalPopulationCount) => {
+    const parentsCount = parents.length;
+    const desiredChildrenCount = originalPopulationCount - parentsCount;
+    let children = [];
 
-// const evolve = (population, target, mutate = 0.1) => {
-//     const populationOriginalCount = population.length;
-//
-//     // mutate the parents
-//
-//
-//     // create children from parents
-//     const parentsCount = parents.length;
-//     const desiredChildrenCount = populationOriginalCount - parentsCount;
-//     let children = [];
-//
-//     for (; children.length < desiredChildrenCount;) {
-//         const maleIndex = getRandom(0, parentsCount - 1);
-//         const femaleIndex = getRandom(0, parentsCount - 1);
-//         if (maleIndex != femaleIndex) {
-//             const male = parents[maleIndex];
-//             const female = parents[femaleIndex];
-//             const half = male.length / 2;
-//             const child = male.slice(0, half - 1).concat(female.slice(half));
-//             children.push(child);
-//         }
-//     }
-//     return parents.concat(children);
-// };
+    while(children.length < desiredChildrenCount){
+        const maleIndex = getRandom(0, parentsCount - 1);
+        const femaleIndex = getRandom(0, parentsCount - 1);
+        if (maleIndex != femaleIndex) {
+            const male = parents[maleIndex];
+            const female = parents[femaleIndex];
+            const half = male.length / 2;
+            const child = male.slice(0, half - 1).concat(female.slice(half));
+            children.push(child);
+        }
+    }
+    return parents.concat(children);
+};
+
 module.exports = {
     getRandom,
     createIndividual,
     fitnessOfIndividual,
     fitnessOfPopulation,
     createPopulation,
-    mutatePopulation
+    mutatePopulation,
+    thisIsSparta,
+    selectSurvivors,
+    breed
 };
