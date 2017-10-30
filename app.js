@@ -6,9 +6,34 @@ const execute = () => {
     const individualLength = 6;
     const max = 100;
     const min = 0;
+    const spartaRatio = 0.3;
+    const survivingRatio = 0.01;
+    const mutation = 1;
+    const iterations = 1000;
 
+    //create population
     let population = createPopulation(populationCount, min, max, individualLength);
 
+    for (let generationCounter = 0; generationCounter < iterations; generationCounter++){
+        //select the best
+        const sparta = thisIsSparta(population, target, spartaRatio);
+        const parents = sparta.parents;
+        const rejects = sparta.rejects;
+
+        //select some from rejects and add them to parents to assure genetic diversity
+        const survivors = selectSurvivors(rejects, survivingRatio);
+        const newParents = parents.concat(survivors);
+
+        //create new generation
+        population = breed(newParents, populationCount);
+
+        //mutate new generation
+        population = mutatePopulation(population, mutation);
+
+        //measure fitness of new generation
+        const fitnessOfNewGeneration = fitnessOfPopulation(population, target);
+        console.log('Generation: ' + generationCounter + ' Fitness: ' + fitnessOfNewGeneration);
+    }
 };
 
 const getRandom = (min, max) => {
@@ -35,6 +60,9 @@ const createPopulation = (count, min, max, length) => {
 };
 
 const fitnessOfIndividual = (individual, target) => {
+    if(!individual){
+        console.log('sige');
+    }
     const sumFitnessOfIndividual = individual.reduce((sum, value) => {
         return sum + value;
     });
@@ -50,7 +78,7 @@ const fitnessOfPopulation = (population, target) => {
 };
 
 // split population into future parents and rejects
-const thisIsSparta = (population, target, spartaRatio = 0.2) => {
+const thisIsSparta = (population, target, spartaRatio) => {
     let pop = population.slice(0);
     pop.sort((a, b) => {
         const fitA = fitnessOfIndividual(a, target);
@@ -64,7 +92,7 @@ const thisIsSparta = (population, target, spartaRatio = 0.2) => {
     return {'parents': parents, 'rejects': rejects};
 };
 
-const selectSurvivors = (rejects, survivingRatio = 0.1) => {
+const selectSurvivors = (rejects, survivingRatio) => {
     let n = Math.round(rejects.length * survivingRatio);
     const arr = rejects.slice(0);
 
@@ -84,21 +112,18 @@ const selectSurvivors = (rejects, survivingRatio = 0.1) => {
 
 const mutateIndividual = (individual) => {
     let mutant = individual.slice(0);
-    const positionToMutate = getRandom(0, mutant.length);
+    const positionToMutate = getRandom(0, mutant.length-1);
     mutant[positionToMutate] = getRandom(Math.min(...mutant), Math.max(...mutant));
     return mutant;
 };
 
-const mutatePopulation = (population, mutation = 0.1) => {
-    let mutants = [];
-    population.forEach((individual) => {
-        let mutant = individual;
+const mutatePopulation = (population, mutation) => {
+    let pop = population.map((individual) => {
         if (getRandom(0, 100) < mutation * 100) {
-            mutant = mutateIndividual(individual);
+            return mutateIndividual(individual);
         }
-        mutants.push(mutant);
     });
-    return mutants;
+    return pop;
 };
 
 const breed = (parents, originalPopulationCount) => {
@@ -131,3 +156,5 @@ module.exports = {
     selectSurvivors,
     breed
 };
+
+//execute();
