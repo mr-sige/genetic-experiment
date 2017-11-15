@@ -4,11 +4,11 @@ const genetic = require('./genetic');
 
 const execute = () => {
 
-    const populationCount = 1000;
-    const individualLength = 50;
+    const populationCount = 100;
+    const individualLength = 100;
 
-    const target = 1000;
-    const max = 500;
+    const target = 5000;
+    const max = 100;
     const min = 0;
 
     const spartaRatio = 0.1;
@@ -39,9 +39,16 @@ const execute = () => {
         const fitnessOfNewGeneration = genetic.fitnessOfPopulation(population, target);
         console.log('Generation: ' + generationCounter + ' Fitness: ' + fitnessOfNewGeneration);
 
-        if(fitnessOfNewGeneration === 0){
-            generationCounter = maxIterations;
-        }
+        // if(fitnessOfNewGeneration === 0){
+        //     generationCounter = maxIterations;
+        // }
+
+        population.find((item) => {
+            const fitnness = genetic.fitnessOfIndividual(item, target);
+            if(fitnness === 0){
+                generationCounter = maxIterations;
+            }
+        });
     }
 };
 
